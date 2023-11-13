@@ -1,9 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.STS" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <!-- Set Color Primary. -->
+
+        <item name="colorPrimary">@color/green</item>
+        <item name="colorPrimaryVariant">@color/green</item>
+        <item name="colorOnPrimary">@color/black</item>
+
     </style>
 
     <style name="Theme.STS" parent="Base.Theme.STS" />
+
+    <!-- Set Color Indicator. -->
+
+    <style name="Custom.App.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+
+        <item name="android:color">@color/green_light_indicator</item>
+        <item name="titleTextColor">@color/white</item>
+
+    </style>
 </resources>

@@ -31,7 +31,6 @@ class FragmentProfile : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val KEY_PRE = "preferences" // Define KEY_PRE
 
         sharedPreferences = requireActivity().getSharedPreferences(KEY_PRE, Context.MODE_PRIVATE)
 

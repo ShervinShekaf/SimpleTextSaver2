@@ -8,9 +8,30 @@
         <item name="colorPrimaryVariant">@color/green</item>
         <item name="colorOnPrimary">@color/black</item>
 
+        <!-- My FontFamily. -->
+
+        <item name="fontFamily">@font/primary_regular</item>
+
+        <item name="colorOnSurface">@color/gray</item>
+
+    </style>
+
+    <style name="Custom.App.Fab" parent="Widget.Design.FloatingActionButton">
+
+        <item name="iconTint">@color/white</item>
+
     </style>
 
     <style name="Theme.STS" parent="Base.Theme.STS" />
+
+    <!-- Set ToolBar Theme. -->
+
+    <style name="Custom.App.Toolbar" parent="Theme.Material3.Dark">
+
+        <item name="fontFamily">@font/primary_bold</item>
+        <item name="android:textSize">26sp</item>
+
+    </style>
 
     <!-- Set Color Indicator. -->
 

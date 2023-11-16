@@ -8,6 +8,21 @@
         <item name="colorPrimaryVariant">@color/green</item>
         <item name="colorOnPrimary">@color/white</item>
 
+        <!-- My FontFamily. -->
+
+        <item name="fontFamily">@font/primary_regular</item>
+
+        <item name="colorOnSurface">@color/white</item>
+
+    </style>
+
+    <!-- Set ToolBar Theme. -->
+
+    <style name="Custom.App.Toolbar" parent="Theme.Material3.Dark">
+
+        <item name="fontFamily">@font/primary_bold</item>
+        <item name="android:textSize">26sp</item>
+
     </style>
 
     <!-- Set Color Indicator. -->

@@ -1,5 +1,6 @@
 package com.example.sts.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,13 +13,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sts.R
 import com.example.sts.adapter.HomeAdapter
 import com.example.sts.data.ItemData
-import com.example.sts.databinding.DialogAddFoodBinding
+import com.example.sts.databinding.DialogAddNoteBinding
 import com.example.sts.databinding.FragmentHomeBinding
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class FragmentHome : Fragment() {
 
+    // ... (your existing code)
     private lateinit var binding: FragmentHomeBinding
+    private val sharedPreferencesKey = "my_shared_preferences_key"
+    private val gson = Gson()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,68 +36,31 @@ class FragmentHome : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setupRecyclerView()
+        val savedData = loadFromSharedPreferences()
+        setupRecyclerView(savedData)
 
         binding.btnAddFood.setOnClickListener {
-            showAddFoodDialog()
+            showAddNoteDialog()
         }
     }
 
-    private fun setupRecyclerView() {
-        val dataFood = arrayListOf(
-            ItemData(
-                "https://static1.varandaz.com/thumbnail/yRSamiwythlG/JXo-XV_t8wit7V-6kA03x905N2uKCH-J2hDqAbLSS8snGXR8qMIRgXjgQJ25YWYxO4ZhE8P_IXw,/+%D9%82%D8%B1%D9%85%D9%87+%D8%B3%D8%A8%D8%B2%DB%8C.jpg",
-                "Ghorme Sabzi",
-                "10$",
-            ),
-            ItemData(
-                "https://www.digikala.com/mag/wp-content/uploads/2021/05/Gheymeh-Recipe.jpg",
-                "Gheimeh",
-                "10$",
-            ),
-            ItemData(
-                "https://www.indianhealthyrecipes.com/wp-content/uploads/2023/05/red-sauce-pasta-recipe.jpg",
-                "Pasta",
-                "12$"
-            ),
-            ItemData(
-                "https://noktechi.ir/wp-content/uploads/2022/04/kabab-koubide-arzan.jpg",
-                "Kabab",
-                "12$"
-            ),
-            ItemData(
-                "https://ashmazi.com/wp-content/uploads/2021/04/167205621_441819387110065_856952460244549032_n.jpg",
-                "Ab Gosht",
-                "12$"
-            ),
-            ItemData(
-                "https://blog.okcs.com/wp-content/uploads/2021/08/%D8%B7%D8%B1%D8%B2-%D8%AA%D9%87%DB%8C%D9%87-%D8%A8%D8%B1%DB%8C%D9%88%D9%86-%D8%A7%D8%B5%D9%81%D9%87%D8%A7%D9%86.jpg",
-                "Beryani",
-                "14$"
-            ),
-            ItemData(
-                "https://harnika.ir/wp-content/uploads/2022/07/ash-reshte-min.jpg",
-                "Ash",
-                "6$"
-            )
-        )
-
-        val myAdapter = HomeAdapter(dataFood)
+    private fun setupRecyclerView(data: ArrayList<ItemData>) {
+        val myAdapter = HomeAdapter(data)
         binding.recyclerMain.adapter = myAdapter
         binding.recyclerMain.layoutManager =
             LinearLayoutManager(context, RecyclerView.VERTICAL, false)
     }
 
-    private fun showAddFoodDialog() {
+    private fun showAddNoteDialog() {
         val dialog = AlertDialog.Builder(requireActivity()).create()
-        val dialogBinding = DialogAddFoodBinding.inflate(layoutInflater)
+        val dialogBinding = DialogAddNoteBinding.inflate(layoutInflater)
 
         dialog.setView(dialogBinding.root)
         dialog.setCancelable(true)
         dialog.show()
 
         dialogBinding.btnYes.setOnClickListener {
-            handleAddFood(dialogBinding, dialog)
+            handleAddNote(dialogBinding, dialog)
         }
 
         dialogBinding.btnNo.setOnClickListener {
@@ -99,23 +68,20 @@ class FragmentHome : Fragment() {
         }
     }
 
-    private fun handleAddFood(dialogBinding: DialogAddFoodBinding, dialog: AlertDialog) {
-        if (
-            dialogBinding.edtFood.length() > 0 &&
-            dialogBinding.edtPrice.length() > 0 &&
-            dialogBinding.edtImg.length() > 0
-        ) {
+    private fun handleAddNote(dialogBinding: DialogAddNoteBinding, dialog: AlertDialog) {
+        val adapter = binding.recyclerMain.adapter as? HomeAdapter
+        if (adapter != null && dialogBinding.edtTitle.length() > 0 && dialogBinding.edtDetail.length() > 0) {
+            val txtTitle = dialogBinding.edtTitle.text.toString()
+            val txtDetail = dialogBinding.edtDetail.text.toString()
 
-            val txtFood = dialogBinding.edtFood.text.toString()
-            val txtPrice = dialogBinding.edtPrice.text.toString()
-            val txtUrl = dialogBinding.edtImg.text.toString()
+            val newFood = ItemData(txtTitle, txtDetail)
+            adapter.addNewFood(newFood)
 
-            val newFood = ItemData(txtUrl, txtFood, txtPrice)
-            (binding.recyclerMain.adapter as HomeAdapter).addNewFood(newFood)
+            // Save the updated data to SharedPreferences
+            saveToSharedPreferences(adapter.data)
 
             binding.recyclerMain.scrollToPosition(0)
             dialog.dismiss()
-
         } else {
             showSnackbarError()
         }
@@ -126,5 +92,26 @@ class FragmentHome : Fragment() {
             .setActionTextColor(ContextCompat.getColor(requireActivity(), R.color.white))
             .setBackgroundTint(ContextCompat.getColor(requireContext(), R.color.green))
             .show()
+    }
+
+    private fun saveToSharedPreferences(data: ArrayList<ItemData>) {
+        val json = gson.toJson(data)
+        val editor = requireActivity().getPreferences(Context.MODE_PRIVATE).edit()
+        editor.putString(sharedPreferencesKey, json)
+        editor.apply()
+    }
+
+    // Function to load data from SharedPreferences
+    private fun loadFromSharedPreferences(): ArrayList<ItemData>{
+        val json = requireActivity().getPreferences(Context.MODE_PRIVATE)
+            .getString(sharedPreferencesKey, null)
+
+        val type = object : TypeToken<ArrayList<ItemData>>() {}.type
+
+        return if (json != null) {
+            gson.fromJson(json, type)
+        } else {
+            ArrayList()
+        }
     }
 }

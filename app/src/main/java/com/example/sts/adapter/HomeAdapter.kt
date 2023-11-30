@@ -9,7 +9,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.sts.data.ItemData
 import com.example.sts.databinding.ItemHomeBinding
 
-class HomeAdapter(private val data: ArrayList<ItemData>) :
+class HomeAdapter(val data: ArrayList<ItemData>) :
     RecyclerView.Adapter<HomeAdapter.FoodViewHolder>() {
 
     inner class FoodViewHolder(private val binding: ItemHomeBinding) :
@@ -17,13 +17,9 @@ class HomeAdapter(private val data: ArrayList<ItemData>) :
 
 
         fun bind(itemData: ItemData) {
-            Glide.with(itemView)
-                .load(itemData.imgMain)
-                .transform(RoundedCorners(16))
-                .into(binding.imgMain)
 
             binding.txtTitle.text = itemData.txtTitle
-            binding.txtPrice.text = itemData.txtPrice
+            binding.txtDetail.text = itemData.txtPrice
         }
     }
 

@@ -14,17 +14,20 @@ import com.example.sts.R
 import com.example.sts.adapter.HomeAdapter
 import com.example.sts.data.ItemData
 import com.example.sts.databinding.DialogAddNoteBinding
+import com.example.sts.databinding.DialogRemoveItemBinding
+import com.example.sts.databinding.DialogUpdateNoteBinding
 import com.example.sts.databinding.FragmentHomeBinding
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class FragmentHome : Fragment() {
+class FragmentHome : Fragment(), HomeAdapter.ClickItem {
 
     // ... (your existing code)
     private lateinit var binding: FragmentHomeBinding
     private val sharedPreferencesKey = "my_shared_preferences_key"
     private val gson = Gson()
+    private lateinit var myAdapter: HomeAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,7 +48,7 @@ class FragmentHome : Fragment() {
     }
 
     private fun setupRecyclerView(data: ArrayList<ItemData>) {
-        val myAdapter = HomeAdapter(data)
+        myAdapter = HomeAdapter(data.clone() as ArrayList<ItemData>, this)
         binding.recyclerMain.adapter = myAdapter
         binding.recyclerMain.layoutManager =
             LinearLayoutManager(context, RecyclerView.VERTICAL, false)
@@ -75,7 +78,7 @@ class FragmentHome : Fragment() {
             val txtDetail = dialogBinding.edtDetail.text.toString()
 
             val newFood = ItemData(txtTitle, txtDetail)
-            adapter.addNewFood(newFood)
+            adapter.addNewItem(newFood)
 
             // Save the updated data to SharedPreferences
             saveToSharedPreferences(adapter.data)
@@ -113,5 +116,77 @@ class FragmentHome : Fragment() {
         } else {
             ArrayList()
         }
+    }
+
+    override fun onNoteClicked(itemData: ItemData, position: Int) {
+
+        val bindingUpdate = DialogUpdateNoteBinding.inflate(layoutInflater)
+        bindingUpdate.edtTitle.setText(itemData.txtTitle)
+        bindingUpdate.edtDetail.setText(itemData.txtDetail)
+
+        val dialogUpdate = AlertDialog.Builder(requireContext()).create()
+        dialogUpdate.setView(bindingUpdate.root)
+        dialogUpdate.setCancelable(true)
+        dialogUpdate.show()
+
+        bindingUpdate.btnYes.setOnClickListener {
+
+            dialogUpdate.dismiss()
+            if (
+
+                bindingUpdate.edtTitle.text!!.isNotEmpty() &&
+                bindingUpdate.edtDetail.text!!.isNotEmpty()
+
+            ) {
+
+                val title = bindingUpdate.edtTitle.text.toString()
+                val detail = bindingUpdate.edtDetail.text.toString()
+
+                val newItem = ItemData(
+
+                    title,
+                    detail
+
+                )
+
+                saveToSharedPreferences(ArrayList<ItemData>())
+
+                myAdapter.updateItem(newItem, position)
+
+            }
+
+        }
+
+        bindingUpdate.btnNo.setOnClickListener {
+
+            dialogUpdate.dismiss()
+
+        }
+
+    }
+
+    override fun onNoteLongClicked(itemData: ItemData, position: Int) {
+
+        val dialogRemoveBinding = DialogRemoveItemBinding.inflate(layoutInflater)
+        val dialogRemove = AlertDialog.Builder(requireContext()).create()
+        dialogRemove.setView(dialogRemoveBinding.root)
+        dialogRemove.setCancelable(true)
+        dialogRemove.show()
+
+        dialogRemoveBinding.btnCancelRemoved.setOnClickListener {
+
+            dialogRemove.dismiss()
+
+        }
+
+        dialogRemoveBinding.btnRemoveItem.setOnClickListener {
+
+            dialogRemove.dismiss()
+            saveToSharedPreferences(ArrayList<ItemData>())
+            myAdapter.removeNote(itemData, position)
+
+        }
+
+
     }
 }
